@@ -1,0 +1,45 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: black;
+}
+.slider {
+    width: 100vw; /* Ширина слайдера равна ширине окна просмотра */
+    height: 100vh; 
+    position: relative;
+    overflow: hidden;
+}
+.slider img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    transition: transform 0.4s;
+    top: 0;
+    left: 0;
+}
+.slider img.active {
+    transform: translateY(0);
+    z-index: 3;
+}
+.slider img.next {
+    transform: translateY(100%);
+    z-index: 1;
+}
+.slider img.previous {
+    transform: translateY(-100%);
+    z-index: 2;
+}
+
+.error{
+    color: red;
+    text-align: center;
+    font-size: 32px;
+    position: absolute;
+    width: 100%;
+    bottom: 50%;    
+
+}
