@@ -1,7 +1,9 @@
 const slider = document.getElementById('slider');
+const errorMessage = document.getElementById('error-message');
 let images = [];
 let currentIndex = 0;
 let lastActivity = Date.now();
+let fetchRetryInterval = null;
 
 
 // Функция устранения тротлинга
@@ -37,8 +39,20 @@ async function fetchImages() {
 
         images = await response.json();
         updateSlider();
+        errorMessage.style.display = 'none';
+
+        if (fetchRetryInterval) {
+          clearInterval(fetchRetryInterval);
+          fetchRetryInterval = null;
+      }
     } catch (error) {
-        console.error('Ошибка получения изображений:', error);
+      console.error('Ошибка получения изображений:', error);
+      errorMessage.style.display = 'block'; // Показать сообщение об ошибке
+
+      // Установить интервал для повторного вызова каждые 10 секунд
+      if (!fetchRetryInterval) {
+          fetchRetryInterval = setInterval(fetchImages, 10000);
+      }
     }
 }
 
@@ -84,6 +98,8 @@ const nextImage = throttle(() => {
   imgElements[(currentIndex - 1 + images.length) % images.length].style.zIndex = '2'; // Предыдущее изображение
 }, 500);
 
+
+
 // Функция для переключения на предыдущее изображение
 const previousImage = throttle(() => {
   if (images.length === 0) return;
@@ -127,4 +143,4 @@ setInterval(() => {
 }, 3000);
 
 // Получение изображений один раз при загрузке
-fetchImages();
+fetchImages().catch();
