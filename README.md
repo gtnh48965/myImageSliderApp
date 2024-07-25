@@ -1,6 +1,7 @@
-  Тестовое Lg
-стили в styles.css
+Тестовое Lg
 
-логика в app.js
+    стили в styles.css
 
-корень проекта index.html
+    логика в app.js
+
+    корень проекта index.html
