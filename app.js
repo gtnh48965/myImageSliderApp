@@ -80,7 +80,7 @@ function updateSlider() {
 
 // Функция для переключения на следующее изображение
 const nextImage = throttle(() => {
-  if (images.length < 1) return;
+  if (images.length < 2) return;
   const imgElements = slider.getElementsByTagName('img');
 
   // Обновляем текущее изображение на 'previous'
@@ -105,7 +105,7 @@ const nextImage = throttle(() => {
 
 // Функция для переключения на предыдущее изображение
 const previousImage = throttle(() => {
-  if (images.length < 1) return;
+  if (images.length < 2) return;
   const imgElements = slider.getElementsByTagName('img');
 
   // Обновляем текущее изображение на 'next'
