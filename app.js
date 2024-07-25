@@ -5,7 +5,6 @@ let currentIndex = 0;
 let lastActivity = Date.now();
 let fetchRetryInterval = null;
 
-
 // Функция устранения тротлинга
 function throttle(func, limit) {
   let lastFunc;
@@ -28,7 +27,6 @@ function throttle(func, limit) {
   };
 }
 
-
 // Функция для получения изображений 
 async function fetchImages() {
     try {
@@ -38,21 +36,28 @@ async function fetchImages() {
         }
 
         images = await response.json();
+
+        // если у нас только 2 елемента, увеличивает до 4, чтобы реализовать бесконечный слайдер
+        if (images.length === 2) {
+            images.push(images[0], images[1]);
+        }
+
         updateSlider();
+
         errorMessage.style.display = 'none';
 
         if (fetchRetryInterval) {
           clearInterval(fetchRetryInterval);
           fetchRetryInterval = null;
-      }
+        }
     } catch (error) {
-      console.error('Ошибка получения изображений:', error);
-      errorMessage.style.display = 'block'; // Показать сообщение об ошибке
+        console.error('Ошибка получения изображений:', error);
+        errorMessage.style.display = 'block'; // Показать сообщение об ошибке
 
-      // Установить интервал для повторного вызова каждые 10 секунд
-      if (!fetchRetryInterval) {
-          fetchRetryInterval = setInterval(fetchImages, 10000);
-      }
+        // Установить интервал для повторного вызова каждые 10 секунд
+        if (!fetchRetryInterval) {
+            fetchRetryInterval = setInterval(fetchImages, 10000);
+        }
     }
 }
 
@@ -75,7 +80,7 @@ function updateSlider() {
 
 // Функция для переключения на следующее изображение
 const nextImage = throttle(() => {
-  if (images.length === 0) return;
+  if (images.length < 1) return;
   const imgElements = slider.getElementsByTagName('img');
 
   // Обновляем текущее изображение на 'previous'
@@ -98,11 +103,9 @@ const nextImage = throttle(() => {
   imgElements[(currentIndex - 1 + images.length) % images.length].style.zIndex = '2'; // Предыдущее изображение
 }, 500);
 
-
-
 // Функция для переключения на предыдущее изображение
 const previousImage = throttle(() => {
-  if (images.length === 0) return;
+  if (images.length < 1) return;
   const imgElements = slider.getElementsByTagName('img');
 
   // Обновляем текущее изображение на 'next'
@@ -135,12 +138,12 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Автоматическое переключение изображения через 10 секунд без активности
+// Автоматическое переключение изображения через 15 секунд без активности
 setInterval(() => {
-    if (Date.now() - lastActivity > 1500) {
+    if (Date.now() - lastActivity > 15000 && images.length > 1) {
         nextImage();
     }
 }, 3000);
 
 // Получение изображений один раз при загрузке
-fetchImages().catch();
+fetchImages();
