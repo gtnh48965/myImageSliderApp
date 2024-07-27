@@ -4,6 +4,7 @@ let images = [];
 let currentIndex = 0;
 let lastActivity = Date.now();
 let fetchRetryInterval = null;
+const socket = new WebSocket('ws://188.225.45.123:3005');
 
 // Функция устранения тротлинга
 function throttle(func, limit) {
@@ -27,39 +28,36 @@ function throttle(func, limit) {
   };
 }
 
-// Функция для получения изображений 
-async function fetchImages() {
-    try {
-        const response = await fetch('http://127.0.0.1:3005/api/images');
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
 
-        images = await response.json();
+// сокет для получения данных
+socket.onopen = () => {
+    console.log('WebSocket соединение открыто');
+};
 
-        // если у нас только 2 елемента, увеличивает до 4, чтобы реализовать бесконечный слайдер
-        if (images.length === 2) {
-            images.push(images[0], images[1]);
-        }
-
-        updateSlider();
-
-        errorMessage.style.display = 'none';
-
-        if (fetchRetryInterval) {
-          clearInterval(fetchRetryInterval);
-          fetchRetryInterval = null;
-        }
-    } catch (error) {
-        console.error('Ошибка получения изображений:', error);
-        errorMessage.style.display = 'block'; // Показать сообщение об ошибке
-
-        // Установить интервал для повторного вызова каждые 10 секунд
-        if (!fetchRetryInterval) {
-            fetchRetryInterval = setInterval(fetchImages, 10000);
-        }
+socket.onmessage = (event) => {
+    images = JSON.parse(event.data);
+    
+    // если у нас только 2 элемента, увеличиваем до 4, чтобы реализовать бесконечный слайдер
+    if (images.length === 2) {
+        images.push(images[0], images[1]);
     }
-}
+    updateSlider();
+  
+};
+
+socket.onclose = () => {
+    errorMessage.style.display = 'none';
+    console.log('WebSocket соединение закрыто');
+    errorMessage.style.display = 'none';
+    errorMessage.style.display = 'block'; // Показать сообщение об ошибке
+};
+
+socket.onerror = (error) => {
+    errorMessage.style.display = 'none';
+    console.error('Ошибка WebSocket:', error);
+    errorMessage.style.display = 'block'; // Показать сообщение об ошибке
+};
+
 
 // Функция для обновления слайдера
 function updateSlider() {
@@ -145,5 +143,5 @@ setInterval(() => {
     }
 }, 3000);
 
-// Получение изображений один раз при загрузке
-fetchImages();
+
+
